@@ -6,8 +6,8 @@ import "fmt"
 type Client struct {
 }
 
-// NewClient creates new client
-func NewClient() *Client {
+// New creates new client
+func New() *Client {
 	return &Client{}
 }
 

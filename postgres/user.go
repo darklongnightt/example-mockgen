@@ -1,18 +1,19 @@
 package postgres
 
 import (
-	"database/sql"
 	"example-mockgen/models"
 	"fmt"
+
+	"github.com/jmoiron/sqlx"
 )
 
 // Repository contains database dependencies and implements methods to interact with db
 type Repository struct {
-	db *sql.DB
+	db *sqlx.DB
 }
 
 // New will return
-func New(db *sql.DB) *Repository {
+func New(db *sqlx.DB) *Repository {
 	return &Repository{db: db}
 }
 

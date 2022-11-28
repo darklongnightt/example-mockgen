@@ -1,0 +1,13 @@
+services:
+  database:
+    image: postgres
+    ports:
+      - 5001:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DATABASE:-example_mockgen}
+volumes:
+  pgdata:
