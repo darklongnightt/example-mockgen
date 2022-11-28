@@ -1,10 +1,10 @@
-package services_test
+package user_test
 
 import (
 	"errors"
 	"example-mockgen/models"
-	"example-mockgen/services"
-	mocks "example-mockgen/services/mocks"
+	"example-mockgen/user"
+	mocks "example-mockgen/user/mocks"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -12,44 +12,41 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-/*
-A simple test case that covers happy path to usage of gomocks
-*/
+// A simple test case that covers only success scenario
+// To demo how mocks work
 func TestCreateUser_Simple(t *testing.T) {
 	ctr := gomock.NewController(t)
 	defer ctr.Finish() // Not required for go1.14+
 
-	s3 := mocks.NewMockIS3Client(ctr)
+	s3 := mocks.NewMockiS3Client(ctr)
 	s3.EXPECT().UploadFile(gomock.Any()).Return(nil).Times(1)
 
-	repo := mocks.NewMockIUserRepo(ctr)
+	repo := mocks.NewMockiRepository(ctr)
 	repo.EXPECT().Insert(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 
-	h := services.NewUserService(repo, s3)
-	got, err := h.CreateUser(&models.User{})
+	s := user.New(repo, s3)
+	got, err := s.CreateUser(&models.User{})
 	assert.Equal(t, &models.User{Name: "mock user"}, got)
 	assert.Equal(t, nil, err)
 }
 
-/*
-Using testify test suite that provide hooks for before and after tests
-Table testing to cover all scenarios
-*/
+// Using testify test suite that provide hooks for before and after tests
+// Table testing to cover multiple scenarios
 type UserSuite struct {
 	suite.Suite
 
 	controller   *gomock.Controller
-	mockUserRepo *mocks.MockIUserRepo
-	mockS3Client *mocks.MockIS3Client
-	service      *services.UserService
+	mockRepo     *mocks.MockiRepository
+	mockS3Client *mocks.MockiS3Client
+	service      *user.Service
 }
 
 // SetupTest runs before all tests to init testing dependencies
 func (s *UserSuite) SetupTest() {
 	s.controller = gomock.NewController(s.T())
-	s.mockUserRepo = mocks.NewMockIUserRepo(s.controller)
-	s.mockS3Client = mocks.NewMockIS3Client(s.controller)
-	s.service = services.NewUserService(s.mockUserRepo, s.mockS3Client)
+	s.mockRepo = mocks.NewMockiRepository(s.controller)
+	s.mockS3Client = mocks.NewMockiS3Client(s.controller)
+	s.service = user.New(s.mockRepo, s.mockS3Client)
 }
 
 // SetupTest runs after each test for cleanups
@@ -73,7 +70,7 @@ func (s *UserSuite) TestCreateUser() {
 		{
 			name: "create a user successfully",
 			initMocks: func() {
-				s.mockUserRepo.EXPECT().Insert(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
+				s.mockRepo.EXPECT().Insert(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 				s.mockS3Client.EXPECT().UploadFile(gomock.Any()).Return(nil).Times(1)
 			},
 			input: &models.User{Name: "input user"},
@@ -83,7 +80,7 @@ func (s *UserSuite) TestCreateUser() {
 		{
 			name: "db returns error",
 			initMocks: func() {
-				s.mockUserRepo.EXPECT().Insert(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
+				s.mockRepo.EXPECT().Insert(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
 			},
 			input: &models.User{Name: "input user"},
 			want:  nil,
@@ -92,7 +89,7 @@ func (s *UserSuite) TestCreateUser() {
 		{
 			name: "s3 returns error",
 			initMocks: func() {
-				s.mockUserRepo.EXPECT().Insert(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
+				s.mockRepo.EXPECT().Insert(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 				s.mockS3Client.EXPECT().UploadFile(gomock.Any()).Return(errors.New("s3 error")).Times(1)
 			},
 			input: &models.User{Name: "input user"},
@@ -122,7 +119,7 @@ func (s *UserSuite) TestUpdateUser() {
 		{
 			name: "update a user successfully",
 			initMocks: func() {
-				s.mockUserRepo.EXPECT().Update(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
+				s.mockRepo.EXPECT().Update(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 			},
 			input: &models.User{Name: "input user"},
 			want:  &models.User{Name: "mock user"},
@@ -131,7 +128,7 @@ func (s *UserSuite) TestUpdateUser() {
 		{
 			name: "db returns error",
 			initMocks: func() {
-				s.mockUserRepo.EXPECT().Update(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
+				s.mockRepo.EXPECT().Update(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
 			},
 			input: &models.User{Name: "input user"},
 			want:  nil,

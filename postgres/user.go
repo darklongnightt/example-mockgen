@@ -6,17 +6,18 @@ import (
 	"fmt"
 )
 
-// UserRepo contains database dependencies
-type UserRepo struct {
+// Repository contains database dependencies and implements methods to interact with db
+type Repository struct {
 	db *sql.DB
 }
 
-func NewUserRepo(db *sql.DB) *UserRepo {
-	return &UserRepo{db: db}
+// New will return
+func New(db *sql.DB) *Repository {
+	return &Repository{db: db}
 }
 
 // Insert creates an user entry
-func (u *UserRepo) Insert(user *models.User) (*models.User, error) {
+func (u *Repository) Insert(user *models.User) (*models.User, error) {
 	fmt.Println("Insert user to db")
 
 	return &models.User{
@@ -26,7 +27,7 @@ func (u *UserRepo) Insert(user *models.User) (*models.User, error) {
 }
 
 // Update updates an existing user
-func (u *UserRepo) Update(user *models.User) (*models.User, error) {
+func (u *Repository) Update(user *models.User) (*models.User, error) {
 	fmt.Println("Update user to db")
 
 	return &models.User{
