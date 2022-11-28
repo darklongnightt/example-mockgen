@@ -10,8 +10,8 @@ import (
 // so based on this quote, the interface should exclusive to the current package, hence, unexported.
 
 type iRepository interface {
-	Insert(user *models.User) (*models.User, error)
-	Update(user *models.User) (*models.User, error)
+	InsertUser(user *models.User) (*models.User, error)
+	UpdateUser(user *models.User) (*models.User, error)
 }
 
 type iS3Client interface {
@@ -32,9 +32,9 @@ func New(repo iRepository, s3 iS3Client) *Service {
 	}
 }
 
-// CreateUser creates a user in db and do something
-func (u *Service) CreateUser(user *models.User) (*models.User, error) {
-	resp, err := u.repo.Insert(user)
+// AddUser adds a user in db, uploads file to s3 and do something
+func (u *Service) AddUser(user *models.User) (*models.User, error) {
+	resp, err := u.repo.InsertUser(user)
 	if err != nil {
 		return nil, err
 	}
@@ -48,9 +48,9 @@ func (u *Service) CreateUser(user *models.User) (*models.User, error) {
 	return resp, nil
 }
 
-// CreateUser udpates a user in db and do something
+// AddUser updates user in db and do something
 func (u *Service) UpdateUser(user *models.User) (*models.User, error) {
-	resp, err := u.repo.Update(user)
+	resp, err := u.repo.UpdateUser(user)
 	if err != nil {
 		return nil, err
 	}

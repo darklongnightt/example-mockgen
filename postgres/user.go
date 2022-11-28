@@ -16,9 +16,9 @@ func New(db *sql.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// Insert creates an user entry
-func (u *Repository) Insert(user *models.User) (*models.User, error) {
-	fmt.Println("Insert user to db")
+// InsertUser creates an user entry
+func (u *Repository) InsertUser(user *models.User) (*models.User, error) {
+	fmt.Println("InsertUser user to db")
 
 	return &models.User{
 		Name: "User returned from db",
@@ -26,8 +26,8 @@ func (u *Repository) Insert(user *models.User) (*models.User, error) {
 	}, nil
 }
 
-// Update updates an existing user
-func (u *Repository) Update(user *models.User) (*models.User, error) {
+// UpdateUser updates an existing user
+func (u *Repository) UpdateUser(user *models.User) (*models.User, error) {
 	fmt.Println("Update user to db")
 
 	return &models.User{

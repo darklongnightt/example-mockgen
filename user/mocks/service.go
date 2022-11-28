@@ -34,34 +34,34 @@ func (m *MockiRepository) EXPECT() *MockiRepositoryMockRecorder {
 	return m.recorder
 }
 
-// Insert mocks base method.
-func (m *MockiRepository) Insert(user *models.User) (*models.User, error) {
+// InsertUser mocks base method.
+func (m *MockiRepository) InsertUser(user *models.User) (*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Insert", user)
+	ret := m.ctrl.Call(m, "InsertUser", user)
 	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Insert indicates an expected call of Insert.
-func (mr *MockiRepositoryMockRecorder) Insert(user interface{}) *gomock.Call {
+// InsertUser indicates an expected call of InsertUser.
+func (mr *MockiRepositoryMockRecorder) InsertUser(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Insert", reflect.TypeOf((*MockiRepository)(nil).Insert), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertUser", reflect.TypeOf((*MockiRepository)(nil).InsertUser), user)
 }
 
-// Update mocks base method.
-func (m *MockiRepository) Update(user *models.User) (*models.User, error) {
+// UpdateUser mocks base method.
+func (m *MockiRepository) UpdateUser(user *models.User) (*models.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Update", user)
+	ret := m.ctrl.Call(m, "UpdateUser", user)
 	ret0, _ := ret[0].(*models.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// Update indicates an expected call of Update.
-func (mr *MockiRepositoryMockRecorder) Update(user interface{}) *gomock.Call {
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockiRepositoryMockRecorder) UpdateUser(user interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Update", reflect.TypeOf((*MockiRepository)(nil).Update), user)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockiRepository)(nil).UpdateUser), user)
 }
 
 // MockiS3Client is a mock of iS3Client interface.

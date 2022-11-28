@@ -17,5 +17,5 @@ func main() {
 	user := user.New(repo, s3)
 
 	// Use functions
-	user.CreateUser(&models.User{})
+	user.AddUser(&models.User{})
 }
