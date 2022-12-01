@@ -2,8 +2,10 @@ package postgres
 
 import (
 	"example-mockgen/models"
-	"fmt"
+	"time"
 
+	"github.com/Masterminds/squirrel"
+	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -17,22 +19,50 @@ func New(db *sqlx.DB) *Repository {
 	return &Repository{db: db}
 }
 
-// InsertUser creates an user entry
-func (u *Repository) InsertUser(user *models.User) (*models.User, error) {
-	fmt.Println("InsertUser user to db")
+// AddUser creates an user entry
+func (r *Repository) AddUser(user *models.User) (*models.User, error) {
+	query := "INSERT INTO users (id, name, age, created_at) VALUES ($1, $2, $3, $4)"
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return nil, err
+	}
+	user.ID = uuid.String()
+	user.CreatedAt = time.Now()
 
-	return &models.User{
-		Name: "User returned from db",
-		Age:  123,
-	}, nil
+	res, err := r.db.Exec(query, user.ID, user.Name, user.Age, user.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
+	if _, err = res.RowsAffected(); err != nil {
+		return nil, err
+	}
+	return user, nil
 }
 
-// UpdateUser updates an existing user
-func (u *Repository) UpdateUser(user *models.User) (*models.User, error) {
-	fmt.Println("Update user to db")
+// GetUsers get all users
+func (r *Repository) GetUsers() ([]*models.User, error) {
+	builder := squirrel.Select("id", "name", "age", "created_at").PlaceholderFormat(squirrel.Dollar)
+	builder = builder.OrderBy("created_at DESC").From("users")
 
-	return &models.User{
-		Name: "User returned from db",
-		Age:  123,
-	}, nil
+	sqlStr, args, err := builder.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := r.db.Query(sqlStr, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	res := []*models.User{}
+	for rows.Next() {
+		u := new(models.User)
+		if err := rows.Scan(&u.ID, &u.Name, &u.Age, &u.CreatedAt); err != nil {
+			return nil, err
+		}
+		res = append(res, u)
+	}
+
+	return res, nil
 }

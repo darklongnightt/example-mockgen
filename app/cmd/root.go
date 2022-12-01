@@ -6,6 +6,7 @@ import (
 	"example-mockgen/postgres"
 	"example-mockgen/s3"
 	"example-mockgen/user"
+	"fmt"
 	"log"
 
 	"github.com/jmoiron/sqlx"
@@ -50,8 +51,18 @@ func Execute() {
 	user := user.New(repo, s3)
 
 	// Use functions
-	user.AddUser(&models.User{
+	if _, err := user.AddUser(&models.User{
 		Name: "user from main",
 		Age:  12,
-	})
+	}); err != nil {
+		log.Fatal("err AddUser: ", err)
+	}
+
+	users, err := user.GetUsers()
+	if err != nil {
+		log.Fatal("err GetUsers: ", err)
+	}
+	for _, user := range users {
+		fmt.Printf("%+v\n", user)
+	}
 }

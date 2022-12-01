@@ -22,7 +22,7 @@ func TestAddUser_Simple(t *testing.T) {
 	s3.EXPECT().UploadFile(gomock.Any()).Return(nil).Times(1)
 
 	repo := mocks.NewMockiRepository(ctr)
-	repo.EXPECT().InsertUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
+	repo.EXPECT().AddUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 
 	s := user.New(repo, s3)
 	got, err := s.AddUser(&models.User{})
@@ -70,7 +70,7 @@ func (s *UserSuite) TestAddUser() {
 		{
 			name: "create user success",
 			initMocks: func() {
-				s.mockRepo.EXPECT().InsertUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
+				s.mockRepo.EXPECT().AddUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 				s.mockS3Client.EXPECT().UploadFile(gomock.Any()).Return(nil).Times(1)
 			},
 			input: &models.User{Name: "input user"},
@@ -80,7 +80,7 @@ func (s *UserSuite) TestAddUser() {
 		{
 			name: "db error",
 			initMocks: func() {
-				s.mockRepo.EXPECT().InsertUser(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
+				s.mockRepo.EXPECT().AddUser(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
 			},
 			input: &models.User{Name: "input user"},
 			want:  nil,
@@ -89,7 +89,7 @@ func (s *UserSuite) TestAddUser() {
 		{
 			name: "s3 error",
 			initMocks: func() {
-				s.mockRepo.EXPECT().InsertUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
+				s.mockRepo.EXPECT().AddUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 				s.mockS3Client.EXPECT().UploadFile(gomock.Any()).Return(errors.New("s3 error")).Times(1)
 			},
 			input: &models.User{Name: "input user"},
@@ -108,38 +108,47 @@ func (s *UserSuite) TestAddUser() {
 	}
 }
 
-func (s *UserSuite) TestUpdateUser() {
+func (s *UserSuite) TestGetUsers() {
 	tests := []struct {
 		name      string
-		input     *models.User
-		want      *models.User
+		want      []*models.User
 		initMocks func()
 		err       error
 	}{
 		{
 			name: "update user success",
 			initMocks: func() {
-				s.mockRepo.EXPECT().UpdateUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
+				s.mockRepo.EXPECT().GetUsers().Return([]*models.User{
+					{
+						ID:   "123",
+						Name: "mock user",
+						Age:  12,
+					},
+				}, nil).Times(1)
 			},
-			input: &models.User{Name: "input user"},
-			want:  &models.User{Name: "mock user"},
-			err:   nil,
+			want: []*models.User{
+				{
+					ID:   "123",
+					Name: "mock user",
+					Age:  12,
+				},
+			},
+			err: nil,
 		},
 		{
 			name: "db error",
 			initMocks: func() {
-				s.mockRepo.EXPECT().UpdateUser(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
+				s.mockRepo.EXPECT().GetUsers().Return(nil, errors.New("db error")).Times(1)
 			},
-			input: &models.User{Name: "input user"},
-			want:  nil,
-			err:   errors.New("db error"),
+			want: nil,
+			err:  errors.New("db error"),
 		},
 	}
 
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
 			tc.initMocks()
-			got, err := s.service.UpdateUser(tc.input)
+			got, err := s.service.GetUsers()
 			assert.Equal(s.T(), tc.want, got, tc.name)
 			assert.Equal(s.T(), tc.err, err, tc.name)
 		})
