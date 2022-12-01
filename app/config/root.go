@@ -13,10 +13,10 @@ type Root struct {
 	Postgres *Postgres
 }
 
-// Init the root configuration by loading variables
+// New inits the root configuration by loading variables
 // from the environment, plus the filenames provided
-func Init(filenames ...string) *Root {
-	// we do not care if there is no .env file.
+func New(filenames ...string) *Root {
+	// Ignore if there is no .env file.
 	_ = godotenv.Overload(filenames...)
 
 	r := new(Root)

@@ -9,41 +9,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Import postgres driver
 )
 
-var (
-	rootConfig *config.Root
-	db         *sqlx.DB
-)
-
-func initConfig() {
-	rootConfig = config.Init()
-}
-
-func initDB(pg *config.Postgres) {
-	dbConn, err := sqlx.Open("postgres", pg.ConnectionString())
-	if err != nil {
-		log.Fatal("connection err: ", err)
-	}
-
-	dbConn.SetConnMaxLifetime(pg.MaxConnectionLifetime)
-	dbConn.SetMaxOpenConns(pg.MaxOpenConnection)
-	dbConn.SetMaxIdleConns(pg.MaxIdleConnection)
-
-	if err = dbConn.Ping(); err != nil {
-		log.Fatal("ping err: ", err)
-	}
-	db = dbConn
-}
-
 // Execute will call the root command execute
 func Execute() {
-	initConfig()
-	initDB(rootConfig.Postgres)
-
-	// Init the dependencies
+	// Init all dependencies
+	cfg := config.New()
+	db, err := postgres.DB(cfg.Postgres)
+	if err != nil {
+		log.Fatal("db connection error: ", err)
+	}
 	repo := postgres.New(db)
 	s3 := s3.New()
 
@@ -51,16 +27,16 @@ func Execute() {
 	user := user.New(repo, s3)
 
 	// Use functions
-	if _, err := user.AddUser(&models.User{
+	if _, err = user.AddUser(&models.User{
 		Name: "user from main",
 		Age:  12,
 	}); err != nil {
-		log.Fatal("err AddUser: ", err)
+		log.Fatal("AddUser error: ", err)
 	}
 
 	users, err := user.GetUsers()
 	if err != nil {
-		log.Fatal("err GetUsers: ", err)
+		log.Fatal("GetUsers error: ", err)
 	}
 	for _, user := range users {
 		fmt.Printf("%+v\n", user)
