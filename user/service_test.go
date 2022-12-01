@@ -61,15 +61,15 @@ func TestUserSuite(t *testing.T) {
 
 func (s *UserSuite) TestAddUser() {
 	tests := []struct {
-		name      string
-		initMocks func()
-		input     *models.User
-		want      *models.User
-		err       error
+		name       string
+		beforeTest func()
+		input      *models.User
+		want       *models.User
+		err        error
 	}{
 		{
 			name: "create user success",
-			initMocks: func() {
+			beforeTest: func() {
 				s.mockRepo.EXPECT().AddUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 				s.mockS3Client.EXPECT().UploadFile(gomock.Any()).Return(nil).Times(1)
 			},
@@ -79,7 +79,7 @@ func (s *UserSuite) TestAddUser() {
 		},
 		{
 			name: "db error",
-			initMocks: func() {
+			beforeTest: func() {
 				s.mockRepo.EXPECT().AddUser(gomock.Any()).Return(nil, errors.New("db error")).Times(1)
 			},
 			input: &models.User{Name: "input user"},
@@ -88,7 +88,7 @@ func (s *UserSuite) TestAddUser() {
 		},
 		{
 			name: "s3 error",
-			initMocks: func() {
+			beforeTest: func() {
 				s.mockRepo.EXPECT().AddUser(gomock.Any()).Return(&models.User{Name: "mock user"}, nil).Times(1)
 				s.mockS3Client.EXPECT().UploadFile(gomock.Any()).Return(errors.New("s3 error")).Times(1)
 			},
@@ -100,7 +100,7 @@ func (s *UserSuite) TestAddUser() {
 
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			tc.initMocks()
+			tc.beforeTest()
 			got, err := s.service.AddUser(tc.input)
 			assert.Equal(s.T(), tc.want, got, tc.name)
 			assert.Equal(s.T(), tc.err, err, tc.name)
@@ -110,14 +110,14 @@ func (s *UserSuite) TestAddUser() {
 
 func (s *UserSuite) TestGetUsers() {
 	tests := []struct {
-		name      string
-		want      []*models.User
-		initMocks func()
-		err       error
+		name       string
+		want       []*models.User
+		beforeTest func()
+		err        error
 	}{
 		{
 			name: "update user success",
-			initMocks: func() {
+			beforeTest: func() {
 				s.mockRepo.EXPECT().GetUsers().Return([]*models.User{
 					{
 						ID:   "123",
@@ -137,7 +137,7 @@ func (s *UserSuite) TestGetUsers() {
 		},
 		{
 			name: "db error",
-			initMocks: func() {
+			beforeTest: func() {
 				s.mockRepo.EXPECT().GetUsers().Return(nil, errors.New("db error")).Times(1)
 			},
 			want: nil,
@@ -147,7 +147,7 @@ func (s *UserSuite) TestGetUsers() {
 
 	for _, tc := range tests {
 		s.Run(tc.name, func() {
-			tc.initMocks()
+			tc.beforeTest()
 			got, err := s.service.GetUsers()
 			assert.Equal(s.T(), tc.want, got, tc.name)
 			assert.Equal(s.T(), tc.err, err, tc.name)
